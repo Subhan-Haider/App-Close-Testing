@@ -1,0 +1,12 @@
+{
+  "name": "closed-testing-portal",
+  "version": "1.0.0",
+  "description": "Play Store Closed Testing Portal",
+  "scripts": {
+    "dev": "serve .",
+    "start": "serve ."
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}

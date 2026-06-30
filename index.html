@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beta Tester Portal — Join Our Closed Test</title>
+  <meta name="description" content="Sign up to become an official Play Store beta tester for our app." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+
+  <!-- Animated background orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="page">
+
+    <!-- ── LOADING ── -->
+    <div id="view-loading" class="card" style="text-align:center;">
+      <div class="spinner" style="width:32px;height:32px;margin:0 auto 1rem;"></div>
+      <p style="color:var(--text-muted);">Loading…</p>
+    </div>
+
+    <!-- ── AUTH ── -->
+    <div id="view-auth" class="card hidden">
+      <div class="brand">
+        <div class="brand-icon">🚀</div>
+        <span class="brand-name">Beta Tester Portal</span>
+      </div>
+
+      <h1 id="auth-heading">Create Account</h1>
+      <p class="subtitle" id="auth-subheading">Sign up to join our exclusive Play Store closed testing program — completely free.</p>
+
+      <form id="auth-form" novalidate>
+        <div class="form-group">
+          <label for="inp-email">Email Address</label>
+          <input type="email" id="inp-email" class="input" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="inp-password">Password</label>
+          <input type="password" id="inp-password" class="input" placeholder="At least 6 characters" required />
+        </div>
+        <button type="submit" id="btn-auth" class="btn btn-primary">
+          <span id="btn-auth-label">Sign Up Free</span>
+          <div id="btn-auth-spinner" class="spinner hidden" style="width:18px;height:18px;border-width:2px;"></div>
+        </button>
+      </form>
+
+      <div id="auth-error" class="error-msg"></div>
+
+      <div class="divider">or</div>
+
+      <button id="btn-google" class="btn btn-google">
+        <svg class="google-logo" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="toggle-auth">
+        <span id="toggle-auth-text">Already have an account?</span>
+        <a id="toggle-auth-link">Log In</a>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD ── -->
+    <div id="view-dashboard" class="card hidden">
+
+      <!-- User bar -->
+      <div class="user-bar">
+        <div class="user-info">
+          <div class="avatar" id="dash-avatar">?</div>
+          <span class="user-email-text" id="dash-email">…</span>
+        </div>
+        <button id="btn-logout" class="btn btn-ghost" style="width:auto;padding:0.4rem 1rem;margin:0;font-size:0.85rem;">Log Out</button>
+      </div>
+
+      <!-- Loading state -->
+      <div id="dash-loading" style="text-align:center;padding:2rem 0;">
+        <div class="spinner" style="width:28px;height:28px;margin:0 auto 0.75rem;"></div>
+        <p style="color:var(--text-muted);font-size:0.9rem;">Loading your status…</p>
+      </div>
+
+      <!-- Dashboard content (shown after status loads) -->
+      <div id="dash-content" class="hidden">
+
+        <!-- Steps progress -->
+        <div class="steps" id="steps-bar">
+          <div class="step" id="step-1" title="Sign Up">
+            <div class="step-num">1</div>
+            <div class="step-label">Sign Up</div>
+          </div>
+          <div class="step-connector" id="conn-1"></div>
+          <div class="step" id="step-2" title="Join Group">
+            <div class="step-num">2</div>
+            <div class="step-label">Join Group</div>
+          </div>
+          <div class="step-connector" id="conn-2"></div>
+          <div class="step" id="step-3" title="Opt In">
+            <div class="step-num">3</div>
+            <div class="step-label">Opt In</div>
+          </div>
+        </div>
+
+        <!-- Step 2 panel: Join Google Group -->
+        <div id="panel-join-group" class="step-panel hidden">
+          <h1>Almost there!</h1>
+          <p class="subtitle">Follow these 2 quick steps to become a beta tester. It only takes a minute.</p>
+
+          <div class="action-card">
+            <h3>① Join our Google Group</h3>
+            <p>This is how Google Play recognizes you as an approved tester. Click the button to open the group and click <strong>"Join group"</strong>.</p>
+            <a id="btn-join-group" href="#" target="_blank" rel="noopener" class="btn btn-primary">
+              🔗 Open Google Group
+            </a>
+          </div>
+
+          <div class="action-card" style="margin-top:0.5rem;">
+            <h3>② Confirm you've joined</h3>
+            <p>Once you've clicked <strong>"Join group"</strong> on the Google Groups page, come back here and press confirm.</p>
+            <button id="btn-confirm-joined" class="btn btn-outline">
+              <span id="confirm-join-label">✔ I've Joined the Group</span>
+              <div id="confirm-join-spinner" class="spinner hidden" style="width:18px;height:18px;border-width:2px;"></div>
+            </button>
+          </div>
+
+          <div id="join-error" class="error-msg"></div>
+        </div>
+
+        <!-- Step 3 panel: Enrolled, click opt-in link -->
+        <div id="panel-enrolled" class="step-panel hidden">
+          <div class="confetti-banner">
+            <span class="emoji">🎉</span>
+            <h3 style="font-size:1.1rem;">You're enrolled as a tester!</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin:0.4rem 0 0;">One final step — click the opt-in link to activate your access on the Play Store.</p>
+          </div>
+
+          <div class="action-card">
+            <h3>Click your Play Store Opt-in Link</h3>
+            <p>This link tells Google Play you accept being a tester. Click it to activate and then you can download the app from the Play Store.</p>
+            <a id="btn-optin" href="#" target="_blank" rel="noopener" class="btn btn-primary" id="btn-optin-link">
+              🟢 Activate Testing Access
+            </a>
+          </div>
+
+          <p style="font-size:0.78rem;color:var(--text-muted);margin-top:1rem;">Or copy the link manually:</p>
+          <div class="link-copy-box" id="copy-link-box" title="Click to copy">
+            <span id="optin-link-text">Loading link…</span>
+            <span class="copy-icon">📋</span>
+          </div>
+          <div class="copy-toast" id="copy-toast"></div>
+
+          <button id="btn-confirm-optin" class="btn btn-ghost" style="margin-top:1rem;font-size:0.85rem;">
+            ✅ I've clicked the opt-in link
+          </button>
+        </div>
+
+        <!-- Done panel -->
+        <div id="panel-done" class="step-panel hidden">
+          <div class="confetti-banner">
+            <span class="emoji">✅</span>
+            <h3 style="font-size:1.1rem;">You're all set!</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin:0.4rem 0 0;">You are an active beta tester. Search for the app on Google Play to download it.</p>
+          </div>
+
+          <div class="action-card" style="text-align:center;">
+            <p>If the app doesn't appear yet, wait a few minutes for Play Store to sync your access, then try again.</p>
+            <a id="btn-play-store" href="https://play.google.com/store" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:0.5rem;">
+              ▶ Open Play Store
+            </a>
+          </div>
+        </div>
+
+      </div><!-- /dash-content -->
+    </div><!-- /view-dashboard -->
+
+  </div><!-- /page -->
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

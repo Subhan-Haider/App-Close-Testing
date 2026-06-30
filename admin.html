@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Testers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .admin-container {
+            max-width: 1000px;
+            width: 90%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+        th, td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        th {
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container admin-container">
+        
+        <div id="login-section" class="glass-card">
+            <h1>Admin Login</h1>
+            <p>Log in with your admin account to manage testers.</p>
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <input type="email" id="admin-email" class="form-control" required placeholder="Admin Email">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="admin-password" class="form-control" required placeholder="Password">
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <div id="admin-error" class="error-message"></div>
+        </div>
+
+        <div id="dashboard-section" class="glass-card hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1 style="margin: 0;">Testers Overview</h1>
+                <button id="logout-btn" class="btn" style="width: auto; padding: 0.5rem 1.5rem;">Log Out</button>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="color: var(--text-muted); font-size: 0.9rem;">
+                    Total Testers: <strong id="total-count" style="color: var(--text-main);">0</strong>
+                </div>
+                <button id="export-csv" class="action-btn">Export CSV</button>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table id="testers-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Sign Up Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testers-tbody">
+                        <tr><td colspan="4" style="text-align: center;">Loading testers...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+        // Must match your app.js config
+        const firebaseConfig = {
+            apiKey:            "AIzaSyDYWf5SjNIbWBeMUl82bV5dDH6_eyvaJB4",
+            authDomain:        "autotypingadmin.firebaseapp.com",
+            databaseURL:       "https://autotypingadmin-default-rtdb.firebaseio.com",
+            projectId:         "autotypingadmin",
+            storageBucket:     "autotypingadmin.firebasestorage.app",
+            messagingSenderId: "669769320373",
+            appId:             "1:669769320373:web:65773e977f62ab8dbf7bfc",
+            measurementId:     "G-ERS3YEL9CQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const functions = getFunctions(app);
+
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const loginForm = document.getElementById('admin-login-form');
+        const tbody = document.getElementById('testers-tbody');
+        let testersData = [];
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // In a real app, verify custom claims here (e.g. user.admin === true)
+                loginSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+                loadTesters();
+            } else {
+                loginSection.classList.remove('hidden');
+                dashboardSection.classList.add('hidden');
+            }
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('admin-email').value;
+            const pass = document.getElementById('admin-password').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                document.getElementById('admin-error').textContent = err.message;
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+        function loadTesters() {
+            const q = query(collection(db, 'testers'), orderBy('signUpDate', 'desc'));
+            onSnapshot(q, (snapshot) => {
+                testersData = [];
+                tbody.innerHTML = '';
+                document.getElementById('total-count').textContent = snapshot.size;
+
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No testers found.</td></tr>';
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const id = doc.id;
+                    testersData.push({id, ...data});
+                    
+                    const date = data.signUpDate ? data.signUpDate.toDate().toLocaleString() : 'Unknown';
+                    
+                    let statusHtml = '';
+                    if (data.status === 'enrolled') statusHtml = '<span class="status-badge status-enrolled" style="margin:0; padding:0.25rem 0.5rem;">Enrolled</span>';
+                    else if (data.status === 'error') statusHtml = '<span class="status-badge" style="margin:0; padding:0.25rem 0.5rem; background: rgba(239, 68, 68, 0.2); color: #ef4444;">Error</span>';
+                    else statusHtml = '<span class="status-badge status-pending" style="margin:0; padding:0.25rem 0.5rem;">' + data.status + '</span>';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${data.email}</td>
+                        <td>${statusHtml}<br><small style="color:var(--error-color);">${data.errorMessage || ''}</small></td>
+                        <td>${date}</td>
+                        <td>
+                            ${data.status === 'error' ? `<button class="action-btn retry-btn" data-uid="${id}">Retry Add</button>` : ''}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                document.querySelectorAll('.retry-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const uid = e.target.dataset.uid;
+                        e.target.textContent = 'Retrying...';
+                        e.target.disabled = true;
+                        
+                        const retryFn = httpsCallable(functions, 'retryGroupAdd');
+                        try {
+                            await retryFn({uid});
+                        } catch(err) {
+                            alert("Retry failed: " + err.message);
+                        }
+                    });
+                });
+            }, (error) => {
+                tbody.innerHTML = `<tr><td colspan="4" style="color: var(--error-color)">Error loading data: ${error.message}. Make sure you have permission.</td></tr>`;
+            });
+        }
+
+        // Simple CSV Export
+        document.getElementById('export-csv').addEventListener('click', () => {
+            let csvContent = "data:text/csv;charset=utf-8,Email,Status,SignUpDate,ErrorMessage\n";
+            testersData.forEach(t => {
+                const date = t.signUpDate ? t.signUpDate.toDate().toISOString() : '';
+                const row = [t.email, t.status, date, t.errorMessage || ''].join(",");
+                csvContent += row + "\r\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "testers_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+</html>
