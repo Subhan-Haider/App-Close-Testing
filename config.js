@@ -5,7 +5,7 @@
 // 1. Your free Google Group join link
 //    Go to groups.google.com → create a group → copy the join link
 //    Example: "https://groups.google.com/g/my-app-beta"
-export const GOOGLE_GROUP_JOIN_URL = "https://groups.google.com/g/close-testing";
+export const GOOGLE_GROUP_JOIN_URL = "https://groups.google.com/g/close-testin";
 
 // 2. Your Play Store opt-in URL
 //    Play Console → your app → Testing → Closed testing → Testers tab → copy URL at bottom
